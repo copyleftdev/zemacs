@@ -28,7 +28,11 @@ zig build
 
 The binary will be at `./zig-out/bin/zemacs`.
 
-## Usage
+## Usage & Configuration
+
+### 🔌 Client Configuration
+**Using Claude Desktop, Windsurf, or Cursor?**
+👉 **[Click here for the Client Configuration Guide](docs/CLIENTS.md)** to copy-paste setup scripts for your editor.
 
 ### 1. TCP Mode (Multi-Agent)
 Run the server in TCP mode to allow multiple connections:
