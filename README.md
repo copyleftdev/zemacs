@@ -53,6 +53,8 @@ Add `clients/emacs/zemacs-client.el` to your load path:
 (zemacs-connect) ;; Connects to localhost:3000
 ```
 
+For configuration guides for **Claude Desktop**, **Windsurf**, and **Cursor**, see [docs/CLIENTS.md](docs/CLIENTS.md).
+
 ## Architecture
 
 *   **Transport**: Supports `stdio` and `tcp` (Thread-per-Connection).
