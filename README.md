@@ -25,7 +25,7 @@
 
 ### Build
 ```bash
-git clone https://github.com/yourusername/zemacs.git
+git clone https://github.com/copyleftdev/zemacs.git
 cd zemacs
 zig build
 ```
