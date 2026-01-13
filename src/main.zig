@@ -12,6 +12,11 @@ pub fn main() !void {
     const args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
 
+    // Initialize Global REPL Manager
+    const repl = @import("tools/repl.zig");
+    repl.global_manager = repl.ReplManager.init(allocator);
+    defer repl.global_manager.deinit();
+
     var mode_tcp = false;
     var port: u16 = 3000;
 

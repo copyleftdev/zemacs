@@ -11,6 +11,7 @@ const exec_tools = @import("../tools/exec.zig");
 const git_tools = @import("../tools/git.zig");
 const lifecycle_tools = @import("../tools/lifecycle.zig");
 const ui_tools = @import("../tools/ui.zig");
+const repl_tools = @import("../tools/repl.zig");
 
 // Sample tool implementation for testing
 const EchoTool = struct {
@@ -50,6 +51,10 @@ pub const ToolRegistry = struct {
         lifecycle_tools.ZemacsHealth,
         lifecycle_tools.ZemacsStatus,
         ui_tools.UiAskUser,
+        repl_tools.ReplStart,
+        repl_tools.ReplEval,
+        repl_tools.ReplRead,
+        repl_tools.ReplKill,
     };
 
     /// Generates the MCP ListToolsResult
