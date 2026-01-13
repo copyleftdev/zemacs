@@ -1,5 +1,9 @@
 # ZEMACS: The Agentic MCP Server
 
+<div align="center">
+  <img src="assets/logo.png" alt="ZEMACS Logo" width="300" />
+</div>
+
 **ZEMACS** is a high-performance **Model Context Protocol (MCP)** server built in **Zig**. It is designed to act as a backend for autonomous coding agents, enabling Emacs (and other clients) to become powerful agentic IDEs.
 
 ## Features
