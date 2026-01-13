@@ -1,0 +1,34 @@
+# Zig
+zig-cache/
+zig-out/
+build/
+.zig-cache/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & Temporary Files
+*.log
+*.tmp
+*.out
+test_result.txt
+annealing_results.txt
+massive_stress.txt
+server_stress.log
+server_anneal.log
+demo_input.json
+
+# IDEs
+.vscode/
+.idea/
