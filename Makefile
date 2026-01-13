@@ -1,44 +1,89 @@
-# ZEMACS Makefile
+# ZEMACS - Agentic MCP Server
+# ===========================
+# 
+# This Makefile provides a comprehensive developer experience for building,
+# testing, analyzing, and deploying the ZEMACS server.
 
+# --- Configuration ---
 ZIG := zig
-BIN_DIR := zig-out/bin
-BINARY := $(BIN_DIR)/zemacs
-CLIENT_SRC := clients/emacs/zemacs-client.el
-CLIENT_DEST := $(HOME)/.emacs.d/lisp/zemacs-client.el
+FLAGS := -Doptimize=ReleaseSafe
+BIN := zig-out/bin/zemacs
+PORT := 3000
+FUZZ_RUNNER := fuzz_runner.py
 
-.PHONY: all build test clean install-emacs verify
+# Colors
+GREEN  := $(shell tput -Txterm setaf 2)
+YELLOW := $(shell tput -Txterm setaf 3)
+BLUE   := $(shell tput -Txterm setaf 4)
+RESET  := $(shell tput -Txterm sgr0)
 
-all: build
+.PHONY: all help build run run-tcp test fuzz fmt clean install-emacs deps
 
+all: help
+
+## ----------------------------------------------------------------------
+## 🚀 Core Commands
+## ----------------------------------------------------------------------
+
+## Build the project
 build:
-	$(ZIG) build
+	@echo "${BLUE}🔨 Building ZEMACS...${RESET}"
+	$(ZIG) build $(FLAGS)
 
-# Runs the internal unit tests
+## Run in StdIO mode (Single Agent)
+run: build
+	@echo "${GREEN}▶️  Running ZEMACS (StdIO)...${RESET}"
+	./$(BIN)
+
+## Run in TCP mode (Multi-Agent) on port 3000
+run-tcp: build
+	@echo "${GREEN}▶️  Running ZEMACS (TCP :${PORT})...${RESET}"
+	./$(BIN) -mode tcp -port $(PORT)
+
+## ----------------------------------------------------------------------
+## 🛡️ Quality & Safety
+## ----------------------------------------------------------------------
+
+## Run Unit Tests
 test:
+	@echo "${YELLOW}🧪 Running Unit Tests...${RESET}"
 	$(ZIG) build test
 
-# Runs the functional integration verification (stdio pipe)
-verify: build
-	@echo "Verifying ZEMACS functional integration..."
-	@printf '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "echo", "arguments": {"message": "Helo"}}}' > verify_input.json
-	@cat verify_input.json | ./$(BINARY) | grep "Helo" && echo "Verification Passed: Stdout Transport" || echo "Verification Failed"
-	@rm verify_input.json
+## Format Code (zig fmt)
+fmt:
+	@echo "${BLUE}🧹 Formatting Code...${RESET}"
+	$(ZIG) fmt src/ clients/
 
-# Installs the Emacs client configuration
-# 1. Creates target directory if not exists
-# 2. Copies the file
-# 3. Updates the binary path in the file to the absolute path of the current build
+## Run Fuzzing Campaign (Security)
+fuzz:
+	@echo "${YELLOW}🌪️  Running Fuzz Harness...${RESET}"
+	$(ZIG) build-exe src/fuzz.zig --name zemacs-fuzz
+	python3 $(FUZZ_RUNNER)
+	@rm -f zemacs-fuzz zemacs-fuzz.o
+
+## ----------------------------------------------------------------------
+## 📦 Installation
+## ----------------------------------------------------------------------
+
+## Install Emacs Client
 install-emacs:
-	@echo "Installing Emacs client..."
-	@mkdir -p $(dir $(CLIENT_DEST))
-	@cp $(CLIENT_SRC) $(CLIENT_DEST)
-	@# Replace the placeholder or default path with the actual absolute path to the binary
-	@sed -i 's|~/Project/zemacs/zig-out/bin/zemacs|$(shell pwd)/$(BINARY)|g' $(CLIENT_DEST)
-	@echo "Installed to $(CLIENT_DEST)"
-	@echo ""
-	@echo "Add the following to your ~/.emacs or ~/.emacs.d/init.el:"
-	@echo "  (add-to-list 'load-path \"$(dir $(CLIENT_DEST))\")"
-	@echo "  (require 'zemacs-client)"
+	@echo "${BLUE}📦 Installing Emacs Client...${RESET}"
+	@mkdir -p ~/.emacs.d/lisp
+	@cp clients/emacs/zemacs-client.el ~/.emacs.d/lisp/
+	@# Update path in the client file
+	@sed -i 's|~/Project/zemacs/zig-out/bin/zemacs|$(shell pwd)/$(BIN)|g' ~/.emacs.d/lisp/zemacs-client.el
+	@echo "${GREEN}✅ Installed to ~/.emacs.d/lisp/zemacs-client.el${RESET}"
 
+## Clean artifacts
 clean:
-	rm -rf zig-out zig-cache
+	@echo "${BLUE}🗑️  Cleaning up...${RESET}"
+	rm -rf zig-out zig-cache zemacs-fuzz *.o crashes/ *.log assets/logo.png.tmp
+
+## ----------------------------------------------------------------------
+## ℹ️  Help
+## ----------------------------------------------------------------------
+
+## Show this help message
+help:
+	@echo "${BLUE}ZEMACS Developer Tools${RESET}"
+	@awk '/^##/ { printf "${YELLOW}%-20s${RESET} %s\n", substr($$0, 4), getline; }' $(MAKEFILE_LIST)
