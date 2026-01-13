@@ -139,21 +139,18 @@ pub const SearchGrep = struct {
                 const file = std.fs.cwd().openFile(full_path, .{}) catch continue;
                 defer file.close();
 
-                // Read checking for string (naive read all for now)
-                // TODO: Line by line reading for memory efficiency
-                const content = file.readToEndAlloc(allocator, 10 * 1024 * 1024) catch continue; // 10MB limit per file
-                defer allocator.free(content);
+                // Stream the file line by line using a buffered reader
+                var buf_reader = std.io.bufferedReader(file.reader());
+                var in_stream = buf_reader.reader();
 
-                if (std.mem.indexOf(u8, content, query) != null) {
-                    // Found it. Find line number?
-                    var line_no: usize = 1;
-                    var it = std.mem.splitScalar(u8, content, '\n');
-                    while (it.next()) |line| {
-                        if (std.mem.indexOf(u8, line, query) != null) {
-                            try buffer.writer().print("{s}:{d}: {s}\n", .{ full_path, line_no, line });
-                        }
-                        line_no += 1;
+                var buf: [4096]u8 = undefined;
+                var line_no: usize = 1;
+
+                while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+                    if (std.mem.indexOf(u8, line, query) != null) {
+                        try buffer.writer().print("{s}:{d}: {s}\n", .{ full_path, line_no, line });
                     }
+                    line_no += 1;
                 }
             } else if (entry.kind == .directory) {
                 try walkGrep(allocator, full_path, query, buffer);

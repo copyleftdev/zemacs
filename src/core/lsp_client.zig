@@ -5,10 +5,12 @@ const protocol = @import("../mcp/protocol.zig"); // Reuse some JSON-RPC types? O
 pub const LspClient = struct {
     child: std.process.Child,
     allocator: std.mem.Allocator,
+    next_id: std.atomic.Value(i64) = std.atomic.Value(i64).init(1),
 
     pub fn init(allocator: std.mem.Allocator, cmd: []const []const u8) !*LspClient {
         var client = try allocator.create(LspClient);
         client.allocator = allocator;
+        client.next_id = std.atomic.Value(i64).init(1);
 
         client.child = std.process.Child.init(cmd, allocator);
         client.child.stdin_behavior = .Pipe;
@@ -34,8 +36,9 @@ pub const LspClient = struct {
             params: @TypeOf(params),
         };
 
+        const id = self.next_id.fetchAdd(1, .monotonic);
         const req = Req{
-            .id = 1, // TODO: Incrementing ID
+            .id = id,
             .method = method,
             .params = params,
         };

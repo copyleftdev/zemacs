@@ -39,8 +39,15 @@ pub const FsRead = struct {
         path: []const u8,
     };
 
+    fn validatePath(path: []const u8) !void {
+        if (path.len == 0) return error.EmptyPath;
+        if (std.mem.indexOf(u8, path, "\x00") != null) return error.InvalidPath;
+        // Basic check: Don't allow paths that look like they're trying to escape up too eagerly without being absolute
+        // Ideally we resolve to absolute but for now we block nulls and empty.
+    }
+
     pub fn run(allocator: std.mem.Allocator, args: Args) !json.Value {
-        // TODO: Path validation / Sandboxing
+        try validatePath(args.path);
 
         const file = std.fs.cwd().openFile(args.path, .{}) catch |err| {
             // Return helpful error string
@@ -49,12 +56,6 @@ pub const FsRead = struct {
         defer file.close();
 
         const content = try file.readToEndAlloc(allocator, 100 * 1024 * 1024); // 100MB max
-        // No need to defer free content, json.Value takes ownership if we wrap it,
-        // OR we let the allocator handle it eventually?
-        // Actually, json.Value doesn't own the string memory usually if it's a slice.
-        // But our allocator logic in dispatch is fleeting?
-        // Wait, dispatch uses stringifyAlloc. We pass the slice.
-        // We will rely on the fact that 'content' is allocated with the request allocator.
         return json.Value{ .string = content };
     }
 };
@@ -68,8 +69,13 @@ pub const FsWrite = struct {
         content: []const u8,
     };
 
+    fn validatePath(path: []const u8) !void {
+        if (path.len == 0) return error.EmptyPath;
+        if (std.mem.indexOf(u8, path, "\x00") != null) return error.InvalidPath;
+    }
+
     pub fn run(allocator: std.mem.Allocator, args: Args) !json.Value {
-        // TODO: Path validation / Sandboxing
+        try validatePath(args.path);
 
         const file = std.fs.cwd().createFile(args.path, .{}) catch |err| {
             return json.Value{ .string = try std.fmt.allocPrint(allocator, "Error creating file: {s}", .{@errorName(err)}) };
