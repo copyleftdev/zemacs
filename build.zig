@@ -4,6 +4,7 @@ const std = @import("std");
 // declaratively construct a build graph that will be executed by an external
 // runner.
 pub fn build(b: *std.Build) void {
+    const version = std.SemanticVersion{ .major = 0, .minor = 2, .patch = 0 };
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
@@ -19,14 +20,14 @@ pub fn build(b: *std.Build) void {
     // some compilation options, such as optimization mode and linked system libraries.
     // Every executable or library we compile will be based on one or more modules.
     const lib_mod = b.createModule(.{
-        // `root_source_file` is the Zig "entry point" of the module. If a module
-        // only contains e.g. external object files, you can make this `null`.
-        // In this case the main source file is merely a path, however, in more
-        // complicated build scripts, this could be a generated file.
+        // `root_source_file` is the Zig "entry point" of the module.
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
     });
+    // Lib doesn't support version in createModule yet (?) but we can use it elsewhere or just ignore for now.
+    // Actually, `b.addExecutable` takes a version.
+    // Let's modify the `exe` and `lib` steps.
 
     // We will also create a module for our other entry point, 'main.zig'.
     const exe_mod = b.createModule(.{
@@ -51,18 +52,15 @@ pub fn build(b: *std.Build) void {
         .linkage = .static,
         .name = "zemacs",
         .root_module = lib_mod,
+        .version = version,
     });
 
-    // This declares intent for the library to be installed into the standard
-    // location when the user invokes the "install" step (the default step when
-    // running `zig build`).
-    b.installArtifact(lib);
+    // ...
 
-    // This creates another `std.Build.Step.Compile`, but this one builds an executable
-    // rather than a static library.
     const exe = b.addExecutable(.{
         .name = "zemacs",
         .root_module = exe_mod,
+        .version = version,
     });
 
     // This declares intent for the executable to be installed into the
