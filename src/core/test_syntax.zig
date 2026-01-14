@@ -2,6 +2,7 @@ const std = @import("std");
 const GapBuffer = @import("buffer.zig").GapBuffer;
 const SyntaxTable = @import("syntax.zig").SyntaxTable;
 const scanSexp = @import("syntax.zig").scanSexp;
+const scanSexpN = @import("syntax.zig").scanSexpN;
 
 test "scanSexp: basic words and symbols" {
     const allocator = std.testing.allocator;
@@ -112,4 +113,25 @@ test "scanSexp: comments" {
     // (foo) is 5 chars.
     // Total 15.
     try std.testing.expectEqual(@as(usize, 15), try scanSexp(buf, &table, 0));
+}
+
+test "scanSexpN: forward multiple" {
+    const allocator = std.testing.allocator;
+    var buf = try GapBuffer.init(allocator, 100);
+    defer buf.deinit();
+    var table = try SyntaxTable.initStandard(allocator);
+    defer table.deinit();
+
+    try buf.insert(0, "a b c (d e)");
+
+    // a -> 1
+    // b -> 3
+    // c -> 5
+    // (d e) -> 11
+
+    // Move forward 3 sexps: a, b, c. Should end at 5.
+    try std.testing.expectEqual(@as(usize, 5), try scanSexpN(buf, &table, 0, 3));
+
+    // Move forward 4 sexps: a, b, c, (d e). Should end at 11
+    try std.testing.expectEqual(@as(usize, 11), try scanSexpN(buf, &table, 0, 4));
 }

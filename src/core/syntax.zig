@@ -184,3 +184,16 @@ pub fn scanSexp(buffer: GapBuffer, table: *const SyntaxTable, start_pos: usize) 
         },
     }
 }
+
+pub fn scanSexpN(buffer: GapBuffer, table: *const SyntaxTable, start_pos: usize, count: isize) !usize {
+    var pos = start_pos;
+    var i: isize = 0;
+    if (count >= 0) {
+        while (i < count) : (i += 1) {
+            pos = try scanSexp(buffer, table, pos);
+        }
+    } else {
+        return error.NotImplemented; // Backward scan todo
+    }
+    return pos;
+}

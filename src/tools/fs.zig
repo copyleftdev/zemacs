@@ -16,7 +16,9 @@ pub const FsProposeWrite = struct {
         const file = std.fs.cwd().openFile(args.path, .{}) catch |err| {
             // If file doesn't exist, treat it as empty for diff (New File)
             if (err == error.FileNotFound) {
-                const diff = try diff_util.computeDiff(allocator, "", args.content);
+                const edits = try diff_util.computeDiff(allocator, "", args.content);
+                defer allocator.free(edits);
+                const diff = try diff_util.formatUnified(allocator, edits);
                 return json.Value{ .string = diff };
             }
             return json.Value{ .string = try std.fmt.allocPrint(allocator, "Error: {s}", .{@errorName(err)}) };
@@ -26,7 +28,9 @@ pub const FsProposeWrite = struct {
         const old_content = try file.readToEndAlloc(allocator, 100 * 1024 * 1024);
         defer allocator.free(old_content);
 
-        const diff = try diff_util.computeDiff(allocator, old_content, args.content);
+        const edits = try diff_util.computeDiff(allocator, old_content, args.content);
+        defer allocator.free(edits);
+        const diff = try diff_util.formatUnified(allocator, edits);
         return json.Value{ .string = diff };
     }
 };

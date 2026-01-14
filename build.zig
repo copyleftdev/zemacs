@@ -54,8 +54,18 @@ pub fn build(b: *std.Build) void {
         .root_module = lib_mod,
         .version = version,
     });
+    b.installArtifact(lib);
 
     // ...
+
+    // Client executable
+    const client_exe = b.addExecutable(.{
+        .name = "zemacs-client",
+        .root_source_file = b.path("src/client.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(client_exe);
 
     const exe = b.addExecutable(.{
         .name = "zemacs",
