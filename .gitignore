@@ -33,3 +33,4 @@ demo_input.json
 .vscode/
 .idea/
 zemacs-fuzz.o
+upstream_emacs/
