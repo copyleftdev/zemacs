@@ -19,6 +19,14 @@
 
 ## Installation
 
+### 📦 Install via Smithery
+To install Zemacs for Claude Desktop automatically via [Smithery](https://smithery.ai/server/zemacs):
+
+```bash
+npx -y @smithery/cli install zemacs --client claude
+```
+[![Smithery Badge](https://smithery.ai/badge/zemacs)](https://smithery.ai/server/zemacs)
+
 ### Prerequisites
 *   **Zig 0.14+** (Nightly/Dev)
 *   Emacs 29+ (for client)

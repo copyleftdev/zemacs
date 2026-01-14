@@ -5,8 +5,13 @@ repository: "https://github.com/copyleftdev/zemacs"
 authors:
   - "copyleftdev"
 
+runtime: "container"
+build:
+  dockerfile: "Dockerfile"
+  dockerBuildPath: "."
+
 # Configuration for how to run this server
-start:
+startCommand:
   type: stdio
   config:
     command: "docker"
@@ -14,9 +19,6 @@ start:
       - "run"
       - "-i"
       - "--rm"
-      # Mount workspace as needed. This is tricky for generic docker usage.
-      # Usually users must configure mounts manually in their MCP client (e.g. Claude Desktop).
-      # But basic command structure is here.
       - "ghcr.io/copyleftdev/zemacs:latest"
 
 # Capabilities (Tools extracted from source)

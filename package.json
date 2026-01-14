@@ -1,0 +1,6 @@
+{
+    "name": "zemacs",
+    "version": "0.3.0",
+    "description": "Agentic MCP Server in Zig",
+    "scripts": {}
+}
