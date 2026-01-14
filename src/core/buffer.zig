@@ -51,6 +51,15 @@ pub const GapBuffer = struct {
         return self.data.len - (self.gap_end - self.gap_start);
     }
 
+    /// Returns the byte at the specified logical position.
+    pub fn get(self: GapBuffer, pos: usize) u8 {
+        if (pos < self.gap_start) {
+            return self.data[pos];
+        } else {
+            return self.data[self.gap_end + (pos - self.gap_start)];
+        }
+    }
+
     /// Moves the gap to the specified logical position.
     fn moveGap(self: *GapBuffer, pos: usize) void {
         const current_pos = self.gap_start;
