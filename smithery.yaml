@@ -1,0 +1,32 @@
+name: zemacs
+description: "A headless, agentic Emacs-like editor exposing an MCP interface for AI coding agents."
+version: "0.3.0"
+repository: "https://github.com/copyleftdev/zemacs"
+authors:
+  - "copyleftdev"
+
+# Configuration for how to run this server
+start:
+  type: stdio
+  config:
+    command: "docker"
+    args:
+      - "run"
+      - "-i"
+      - "--rm"
+      # Mount workspace as needed. This is tricky for generic docker usage.
+      # Usually users must configure mounts manually in their MCP client (e.g. Claude Desktop).
+      # But basic command structure is here.
+      - "ghcr.io/copyleftdev/zemacs:latest"
+
+# Capabilities (Tools extracted from source)
+capabilities:
+  tools:
+    - name: "fs.read"
+      description: "Read file contents"
+    - name: "fs.write"
+      description: "Write content to files"
+    - name: "repl.start"
+      description: "Start a new persistent REPL process"
+    - name: "exec.run"
+      description: "Execute shell commands"
